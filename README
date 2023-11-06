@@ -1,0 +1,49 @@
+IMBREA GIULIA-STEFANIA
+321 CB - TEMA 1 SO
+				===LOADER DE EXECUTABILE===
+
+1) Explicatii:
+
+in loader.c
+
+functia: int fault_segment(void *fault)
+	- trec prin fiecare segment
+	- verific daca adresa fault este intre inceputul segmentului(vaddr) si sfarsitul lui(vaddr + mem_size) => am gasit segmentul
+
+functia: static void segv_handler(int signum, siginfo_t *info, void *context)
+	- CAZ 1: adresa nu e in niciun segment => default_handler
+	- CAZ 2: avem segmentul
+		2.1 :	pagina e deja mapata(in data[page_index] este 1) => default_handler
+		2.2 : pagina nu e mapata (sugestie: uita-te pe desenul de mai jos)
+			- mapez initial cu mmap (si copiez)
+			- iau cazurile sunt in zona cu zero-uri: (urmarind schema unui segment pe site-ul temei)
+				a.  adresa fault depaseste file_size => zona cu zero
+				b.  o parte este copiata(pana la file_size, restul este setat la zero
+				    observatii: partea care este pana in file_size are dimensiunea de seg->file_size % pagesize
+			-mmprotect cu permisiunile din segment
+			-actualizez campul data(pagina a fost mapata)
+
+
+pt b.
+
+				file_size%pagesize
+vaddr					________     fault
+|		   		     |	  |    |
+[  pag0	  ][  pag1	    ][  pag2  :       ][     ...
+|_____________________________________|      zero    ...					  						
+|		file_size
+|__________________________________________________|
+|					memsize
+
+2)FEEDBACK
+Ideea temei mi s-a parut super misto insa partea de documentatie a durat ceva.
+As fi preferat sa fi facut la laborator ceva care sa ma ajute concret in ceea ce priveste tema.
+
+
+3)Bibliografie:
+-laboratorul de semnale
+-macro-ul DIE este copiat de pe ocw
+-manualul pt mmap, memset, mmprotect, sigaction
+Pt explicatii:
+-https://homes.di.unimi.it/sisop/lucidi1415/Dispensa.pdf
+-https://linux-audit.com/elf-binaries-on-linux-understanding-and-analysis/#:~:text=An%20ELF%20file%20consists%20of%20zero%20or%20more%20segments%2C%20and,instructions%20into%20a%20memory%20image.
